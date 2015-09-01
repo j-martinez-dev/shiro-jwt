@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.panchitoboy</groupId>
     <artifactId>shiro-jwt</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
   
     <parent>
@@ -40,7 +40,7 @@
         <connection>scm:git:git@github.com:panchitoboy/shiro-jwt.git</connection>
         <developerConnection>scm:git:git@github.com:panchitoboy/shiro-jwt.git</developerConnection>
         <url>git@github.com:panchitoboy/shiro-jwt.git</url>
-      <tag>HEAD</tag>
+      <tag>shiro-jwt-1.1</tag>
   </scm>
 
     <distributionManagement>
