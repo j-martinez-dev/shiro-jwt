@@ -40,8 +40,8 @@
         <connection>scm:git:git@github.com:panchitoboy/shiro-jwt.git</connection>
         <developerConnection>scm:git:git@github.com:panchitoboy/shiro-jwt.git</developerConnection>
         <url>git@github.com:panchitoboy/shiro-jwt.git</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <distributionManagement>
         <repository>
@@ -55,6 +55,7 @@
     </distributionManagement>    
 
     <properties>
+        <org.apache.deltaspike>1.5.0</org.apache.deltaspike>
         <com.fasterxml.jackson>2.6.0</com.fasterxml.jackson>
         <org.apache.shiro>1.2.4</org.apache.shiro>
         <org.jboss.arquillian>1.1.8.Final</org.jboss.arquillian>
@@ -186,6 +187,18 @@
             <groupId>org.ops4j.pax.shiro</groupId>
             <artifactId>pax-shiro-cdi-web</artifactId>
             <version>0.1.0</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-data-module-api</artifactId>
+            <version>${org.apache.deltaspike}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-data-module-impl</artifactId>
+            <version>${org.apache.deltaspike}</version>
+            <scope>runtime</scope>
         </dependency>        
         <!-- JWT -->
         <dependency>
