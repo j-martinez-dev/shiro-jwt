@@ -4,18 +4,18 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
+import com.nimbusds.jwt.JWTClaimsSet;
 
 public class MACVerifierExtended extends MACVerifier {
 
-    private final ReadOnlyJWTClaimsSet claimsSet;
+    private final JWTClaimsSet claimsSet;
 
-    public MACVerifierExtended(final byte[] sharedSecret, ReadOnlyJWTClaimsSet claimsSet) {
+    public MACVerifierExtended(final byte[] sharedSecret, JWTClaimsSet claimsSet) throws JOSEException {
         super(sharedSecret);
         this.claimsSet = claimsSet;
     }
 
-    public MACVerifierExtended(final String sharedSecretString, ReadOnlyJWTClaimsSet claimsSet) {
+    public MACVerifierExtended(final String sharedSecretString, JWTClaimsSet claimsSet) throws JOSEException {
         super(sharedSecretString);
         this.claimsSet = claimsSet;
     }

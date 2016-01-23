@@ -3,7 +3,6 @@ package com.github.panchitoboy.shiro.rest;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.apache.deltaspike.core.api.config.ConfigProperty;
 import org.apache.shiro.ShiroException;
 
 @Provider
@@ -21,9 +19,7 @@ public class SecurityExceptionMapper implements ExceptionMapper<ShiroException> 
     @Context
     HttpServletRequest req;
 
-    @Inject
-    @ConfigProperty(name = "security.exception.messages.file", defaultValue = "messages")
-    String resourceBundleFile;
+    public static final String RESOURCE_BUNDLE_FILE = "messages";
 
     @Override
     public Response toResponse(ShiroException exception) {
@@ -35,7 +31,7 @@ public class SecurityExceptionMapper implements ExceptionMapper<ShiroException> 
     private String getMessage(String key, HttpServletRequest req) {
         Locale currentLocale = req.getLocale().stripExtensions();
         try {
-            ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceBundleFile, currentLocale);
+            ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_FILE, currentLocale);
             String message = resourceBundle.getString(key);
             return message;
         } catch (MissingResourceException ex) {

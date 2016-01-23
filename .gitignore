@@ -1,2 +1,4 @@
 /target/
 /nbactions.xml
+/release.properties
+/pom.xml.releaseBackup

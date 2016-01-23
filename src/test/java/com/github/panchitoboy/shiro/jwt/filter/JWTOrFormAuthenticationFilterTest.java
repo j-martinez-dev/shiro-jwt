@@ -1,11 +1,14 @@
 package com.github.panchitoboy.shiro.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.panchitoboy.shiro.jwt.example.boundary.UserRepositoryExample;
+import com.github.panchitoboy.shiro.jwt.example.entity.UserDefaultExample;
 import com.github.panchitoboy.shiro.jwt.example.jackson.MixInExample;
+import com.github.panchitoboy.shiro.jwt.example.jackson.ObjectMapperProviderExample;
+import com.github.panchitoboy.shiro.jwt.example.rest.JAXRSConfigurationExample;
 import com.github.panchitoboy.shiro.jwt.example.rest.ResourceExample;
 import com.github.panchitoboy.shiro.jwt.repository.TokenResponse;
-import com.github.panchitoboy.shiro.jwt.example.entity.UserDefaultExample;
-import com.github.panchitoboy.shiro.jwt.test.Deployments;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -20,10 +23,19 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jboss.shrinkwrap.resolver.api.maven.ScopeType;
+import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +43,37 @@ import org.junit.runner.RunWith;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-public class JWTOrFormAuthenticationFilterTest extends Deployments {
+public class JWTOrFormAuthenticationFilterTest {
 
     private static String token;
     private ObjectMapper objectMapper;
+
+    @Deployment
+    public static Archive<?> deployment() {
+
+        File[] filesCompile = Maven.resolver().loadPomFromFile("pom.xml").importDependencies(ScopeType.COMPILE).resolve().withTransitivity().asFile();
+        File[] filestest = Maven.resolver().loadPomFromFile("pom.xml")
+                .resolve("com.fasterxml.jackson.core:jackson-annotations", "com.fasterxml.jackson.core:jackson-databind", "com.fasterxml.jackson.core:jackson-core").withTransitivity().asFile();
+
+        JavaArchive jar = ShrinkWrap.create(MavenImporter.class)
+                .loadPomFromFile("pom.xml")
+                .importBuildOutput()
+                .as(JavaArchive.class);
+
+        WebArchive war = ShrinkWrap.create(WebArchive.class)
+                .addAsLibraries(filestest)
+                .addAsLibraries(jar)
+                .addAsLibraries(filesCompile)
+                .addClasses(UserDefaultExample.class, UserRepositoryExample.class)
+                .addClasses(JAXRSConfigurationExample.class, ObjectMapperProviderExample.class, ResourceExample.class)
+                .addAsWebInfResource("WEB-INF/test.shiro.ini", "shiro.ini")
+                .addAsWebInfResource("WEB-INF/web.xml", "web.xml")
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+
+        System.out.println(war.toString(true));
+
+        return war;
+    }
 
     @ArquillianResource
     private URL base;
@@ -62,7 +101,7 @@ public class JWTOrFormAuthenticationFilterTest extends Deployments {
         UserDefaultExample user = new UserDefaultExample();
         user.setUserId("userId1");
         user.setPassword("password11");
-        target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.entity(user, MediaType.APPLICATION_JSON), TokenResponse.class);
+        target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(objectMapper.writeValueAsString(user)), TokenResponse.class);
     }
 
     @Test
@@ -71,7 +110,7 @@ public class JWTOrFormAuthenticationFilterTest extends Deployments {
         UserDefaultExample user = new UserDefaultExample();
         user.setUserId("userId1");
         user.setPassword("password1");
-        Response r1 = target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.entity(user, MediaType.APPLICATION_JSON));
+        Response r1 = target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(objectMapper.writeValueAsString(user)));
         TokenResponse tokenResponse = objectMapper.readValue(r1.readEntity(String.class), TokenResponse.class);
         token = tokenResponse.getToken();
     }

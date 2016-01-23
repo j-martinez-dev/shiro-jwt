@@ -1,6 +1,5 @@
 package com.github.panchitoboy.shiro.jwt.verifier;
 
-import com.github.panchitoboy.shiro.jwt.verifier.MACVerifierExtended;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -36,13 +35,7 @@ public class MACVerifierExtendedTest {
 
     @Test
     public void validToken() throws JOSEException, ParseException {
-        JWTClaimsSet jwtClaims = new JWTClaimsSet();
-        jwtClaims.setIssuer("issuer");
-        jwtClaims.setSubject("subject");
-        jwtClaims.setIssueTime(new Date());
-        jwtClaims.setNotBeforeTime(new Date());
-        jwtClaims.setExpirationTime(new Date(new Date().getTime() + 100000));
-        jwtClaims.setJWTID(UUID.randomUUID().toString());
+        JWTClaimsSet jwtClaims = getJWTClaimsSet("issuer", "subject", new Date(), new Date(), new Date(new Date().getTime() + 100000));
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
@@ -63,13 +56,7 @@ public class MACVerifierExtendedTest {
 
     @Test
     public void invalidTokenNotBeforeTime() throws JOSEException, ParseException {
-        JWTClaimsSet jwtClaims = new JWTClaimsSet();
-        jwtClaims.setIssuer("issuer");
-        jwtClaims.setSubject("subject");
-        jwtClaims.setIssueTime(new Date());
-        jwtClaims.setNotBeforeTime(new Date(new Date().getTime() + 100000));
-        jwtClaims.setExpirationTime(new Date(new Date().getTime() + 200000));
-        jwtClaims.setJWTID(UUID.randomUUID().toString());
+        JWTClaimsSet jwtClaims = getJWTClaimsSet("issuer", "subject", new Date(), new Date(new Date().getTime() + 100000), new Date(new Date().getTime() + 200000));
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
@@ -90,13 +77,7 @@ public class MACVerifierExtendedTest {
 
     @Test
     public void invalidTokenExpirationTime() throws JOSEException, ParseException {
-        JWTClaimsSet jwtClaims = new JWTClaimsSet();
-        jwtClaims.setIssuer("issuer");
-        jwtClaims.setSubject("subject");
-        jwtClaims.setIssueTime(new Date());
-        jwtClaims.setNotBeforeTime(new Date());
-        jwtClaims.setExpirationTime(new Date());
-        jwtClaims.setJWTID(UUID.randomUUID().toString());
+        JWTClaimsSet jwtClaims = getJWTClaimsSet("issuer", "subject", new Date(), new Date(), new Date());
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
@@ -114,4 +95,16 @@ public class MACVerifierExtendedTest {
 
         Assert.assertFalse("Must be invalid", signed.verify(verifier));
     }
+
+    private JWTClaimsSet getJWTClaimsSet(String issuer, String subject, Date issueTime, Date notBeforeTime, Date expirationTime) {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+        builder.issuer(issuer);
+        builder.subject(subject);
+        builder.issueTime(issueTime);
+        builder.notBeforeTime(notBeforeTime);
+        builder.expirationTime(expirationTime);
+        builder.jwtID(UUID.randomUUID().toString());
+        return builder.build();
+    }
+
 }
