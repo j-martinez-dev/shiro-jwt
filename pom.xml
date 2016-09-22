@@ -58,13 +58,13 @@
         <java.min.version>1.8</java.min.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>        
         <version.javaee_api>7.0</version.javaee_api>
-        <version.shiro>1.2.4</version.shiro>
-        <version.nimbus-jose-jwt>4.11.2</version.nimbus-jose-jwt>
+        <version.shiro>1.3.2</version.shiro>
+        <version.nimbus-jose-jwt>4.26.1</version.nimbus-jose-jwt>
         <version.arquillian_core>1.1.10.Final</version.arquillian_core>
-        <version.arquillian_chameleon>1.0.0.Alpha6</version.arquillian_chameleon>
+        <version.arquillian_chameleon>1.0.0.Alpha7</version.arquillian_chameleon>
         <version.junit>4.12</version.junit>
-        <version.jersey>2.22.1</version.jersey>
-        <version.jackson>2.7.0</version.jackson>
+        <version.jersey>2.23.2</version.jersey>
+        <version.jackson>2.8.3</version.jackson>
     </properties>
            
     <dependencyManagement>
