@@ -1,0 +1,1 @@
+TODO====* Make the JWTOrFormAuthenticationFilter part of apache shiro original project* Write ShiroInterceptor example
