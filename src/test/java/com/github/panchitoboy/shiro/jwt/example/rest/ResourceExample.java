@@ -1,8 +1,12 @@
 package com.github.panchitoboy.shiro.jwt.example.rest;
 
+import com.github.panchitoboy.shiro.interceptor.SecurityChecked;
+import com.github.panchitoboy.shiro.jwt.JWTGeneratorVerifier;
 import com.github.panchitoboy.shiro.jwt.example.entity.UserDefaultExample;
 import com.github.panchitoboy.shiro.jwt.repository.TokenResponse;
-import com.github.panchitoboy.shiro.jwt.repository.UserRepository;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresRoles;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.Json;
@@ -13,16 +17,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.shiro.SecurityUtils;
 
 @Path("test")
 @Stateless
+@SecurityChecked(type = "JAX-RS")
 public class ResourceExample {
 
     public static final String MESSAGE = "It works!!";
 
+
     @Inject
-    UserRepository shiroBoundary;
+    JWTGeneratorVerifier jwtService;
+
+    public void setJwtService(JWTGeneratorVerifier jwtGeneratorVerifier) {
+        this.jwtService = jwtGeneratorVerifier;
+    }
 
     @POST
     @Path("login")
@@ -30,13 +39,14 @@ public class ResourceExample {
     public Response login() throws Exception {
 
         UserDefaultExample user = (UserDefaultExample) SecurityUtils.getSubject().getPrincipal();
-        TokenResponse token = shiroBoundary.createToken(user);
+        TokenResponse token = jwtService.createToken(user);
         return Response.status(200).entity(token).build();
     }
 
     @GET
     @Path("secured")
     @Produces(MediaType.APPLICATION_JSON)
+    @RequiresRoles("service1")
     public Response secured() throws Exception {
         JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("message", MESSAGE);

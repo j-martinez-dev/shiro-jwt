@@ -1,13 +1,15 @@
 package com.github.panchitoboy.shiro.jwt.filter;
 
+
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.shiro.authc.AuthenticationToken;
 
 public class JWTAuthenticationToken implements AuthenticationToken {
 
     private Object userId;
-    private String token;
+    private SignedJWT token;
 
-    public JWTAuthenticationToken(Object userId, String token) {
+    public JWTAuthenticationToken(Object userId, SignedJWT token) {
         this.userId = userId;
         this.token = token;
     }
@@ -30,11 +32,11 @@ public class JWTAuthenticationToken implements AuthenticationToken {
         this.userId = userId;
     }
 
-    public String getToken() {
+    public SignedJWT getToken() {
         return token;
     }
 
-    public void setToken(String token) {
+    public void setToken(SignedJWT token) {
         this.token = token;
     }
 

@@ -3,13 +3,14 @@ package com.github.panchitoboy.shiro.jwt.example.boundary;
 import com.github.panchitoboy.shiro.jwt.example.entity.UserDefaultExample;
 import com.github.panchitoboy.shiro.jwt.repository.UserDefault;
 import com.github.panchitoboy.shiro.jwt.repository.UserRepository;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.ops4j.pax.shiro.cdi.ShiroIni;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.shiro.authc.credential.PasswordService;
-import org.ops4j.pax.shiro.cdi.ShiroIni;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class UserRepositoryExample implements UserRepository {
@@ -18,7 +19,6 @@ public class UserRepositoryExample implements UserRepository {
     @ShiroIni
     PasswordService passwordService;
 
-    private byte[] sharedKey;
     private Map<Object, UserDefaultExample> userIdValues = new HashMap<>();
     private final Map<Object, UserDefaultExample> idValues = new HashMap<>();
 
@@ -26,7 +26,11 @@ public class UserRepositoryExample implements UserRepository {
     public void init() {
 
         UserDefaultExample udt1 = new UserDefaultExample("id1", "userId1", passwordService.encryptPassword("password1"));
+        udt1.addRole("service1");
+
+
         UserDefaultExample udt2 = new UserDefaultExample("id2", "userId2", passwordService.encryptPassword("password2"));
+
 
         userIdValues.put("userId1", udt1);
         userIdValues.put("userId2", udt2);
@@ -45,22 +49,6 @@ public class UserRepositoryExample implements UserRepository {
         return idValues.get(id);
     }
 
-    @Override
-    public String getIssuer() {
-        return "issuer";
-    }
 
-    @Override
-    public long getExpirationDate() {
-        return 1000 * 5;
-    }
-
-    @Override
-    public byte[] getSharedKey() {
-        if (sharedKey == null) {
-            sharedKey = generateSharedKey();
-        }
-        return sharedKey;
-    }
 
 }

@@ -1,23 +1,32 @@
 package com.github.panchitoboy.shiro.jwt.filter;
 
-import com.nimbusds.jose.JWSObject;
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.ParseException;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jwt.SignedJWT;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+
+/**
+ * Generated Shiro {@link AuthenticationToken} based on whether it is a Login or post login
+ * For Login it will generate a {@link UsernamePasswordToken}
+ * For post Login it will generate a {@link JWTAuthenticationToken}
+ *
+ * This also sets the Login URL in case a redirect is required when session expires etc.
+ */
 public final class JWTOrFormAuthenticationFilter extends AuthenticatingFilter {
 
     public static final String USER_ID = "userId";
@@ -60,24 +69,25 @@ public final class JWTOrFormAuthenticationFilter extends AuthenticatingFilter {
     protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) throws IOException {
 
         if (isLoginRequest(request, response)) {
-            String json = IOUtils.toString(request.getInputStream());
 
-            if (json != null && !json.isEmpty()) {
+            JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+            try
+            {
+                JSONObject json = (JSONObject) parser.parse(request.getInputStream());
+                String username = (String)json.get(USER_ID);
+                String password = (String)json.get(PASSWORD);
+                return new UsernamePasswordToken(username, password);
 
-                try (JsonReader jr = Json.createReader(new StringReader(json))) {
-                    JsonObject object = jr.readObject();
-                    String username = object.getString(USER_ID);
-                    String password = object.getString(PASSWORD);
-                    return new UsernamePasswordToken(username, password);
-                }
-
+            }catch (ParseException ex)
+            {
+                throw new IOException("Could not parse JSON", ex);
             }
         }
 
         if (isLoggedAttempt(request, response)) {
             String jwtToken = getAuthzHeader(request);
             if (jwtToken != null) {
-                return createToken(jwtToken);
+                return createJWTToken(jwtToken);
             }
         }
 
@@ -103,19 +113,23 @@ public final class JWTOrFormAuthenticationFilter extends AuthenticatingFilter {
         return httpRequest.getHeader(AUTHORIZATION_HEADER);
     }
 
-    public JWTAuthenticationToken createToken(String token) {
+    /**
+     * Create the Shiro {@link JWTAuthenticationToken} from the received JWT string
+     *
+     * @param  base64 encoded JWT Token
+     * @return JWTAuthenticationToken
+     * @throws AuthenticationException if JWT token cannot be parsed or has 'none' set as algorithm
+     */
+    public AuthenticationToken createJWTToken(String token) {
         try {
-            JWSObject jwsObject = JWSObject.parse(token);
-            String decrypted = jwsObject.getPayload().toString();
-            
-            try (JsonReader jr = Json.createReader(new StringReader(decrypted))) {
-                JsonObject object = jr.readObject();
-
-                String userId = object.getString("sub", null);
-                return new JWTAuthenticationToken(userId, token);
+            SignedJWT jwsObject = SignedJWT.parse(token);
+            if(jwsObject.getHeader().getAlgorithm().equals(JWSAlgorithm.NONE))
+            {
+                throw new AuthenticationException("JWT Token Algorithm cannot be set to 'none'");
             }
+            return new JWTAuthenticationToken(jwsObject.getJWTClaimsSet().getSubject(), jwsObject);
 
-        } catch (ParseException ex) {
+        } catch (java.text.ParseException ex) {
             throw new AuthenticationException(ex);
         }
 

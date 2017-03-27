@@ -4,8 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.github.panchitoboy.shiro.jwt.repository.UserDefault;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDefaultExample implements UserDefault {
+
+    private Set<String> roles = new HashSet<>();
 
     public UserDefaultExample() {
     }
@@ -30,6 +35,18 @@ public class UserDefaultExample implements UserDefault {
     @JsonIgnore
     public Object getCredentials() {
         return getPassword();
+    }
+
+    @Override
+    @JsonIgnore
+    public  Set<String> getRoles() {
+
+        return roles;
+    }
+
+    public void addRole(String role)
+    {
+        roles.add(role);
     }
 
     @Override

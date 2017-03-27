@@ -2,19 +2,17 @@ package com.github.panchitoboy.shiro.jwt.realm;
 
 import com.github.panchitoboy.shiro.jwt.repository.UserDefault;
 import com.github.panchitoboy.shiro.jwt.repository.UserRepository;
-import javax.inject.Inject;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAccount;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.realm.AuthorizingRealm;
-import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.realm.AuthenticatingRealm;
 import org.ops4j.pax.shiro.cdi.ShiroIni;
 
+import javax.inject.Inject;
+
 @ShiroIni
-public class FormRealm extends AuthorizingRealm {
+public class FormRealm extends AuthenticatingRealm {
 
     @Inject
     private UserRepository userRepository;
@@ -37,8 +35,5 @@ public class FormRealm extends AuthorizingRealm {
         return null;
     }
     
-        @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        return new SimpleAuthorizationInfo(((UserDefault) principals.getPrimaryPrincipal()).getRoles());
-    }
+
 }

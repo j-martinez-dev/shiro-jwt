@@ -8,20 +8,6 @@ import com.github.panchitoboy.shiro.jwt.example.jackson.ObjectMapperProviderExam
 import com.github.panchitoboy.shiro.jwt.example.rest.JAXRSConfigurationExample;
 import com.github.panchitoboy.shiro.jwt.example.rest.ResourceExample;
 import com.github.panchitoboy.shiro.jwt.repository.TokenResponse;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import javax.json.JsonObject;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -30,7 +16,6 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
@@ -40,6 +25,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import javax.json.JsonObject;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
 @RunWith(Arquillian.class)
 @RunAsClient
@@ -68,7 +64,7 @@ public class JWTOrFormAuthenticationFilterTest {
                 .addClasses(JAXRSConfigurationExample.class, ObjectMapperProviderExample.class, ResourceExample.class)
                 .addAsWebInfResource("WEB-INF/test.shiro.ini", "shiro.ini")
                 .addAsWebInfResource("WEB-INF/web.xml", "web.xml")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+                .addAsWebInfResource("META-INF/beans.xml", "beans.xml");
 
         System.out.println(war.toString(true));
 
@@ -89,11 +85,13 @@ public class JWTOrFormAuthenticationFilterTest {
         objectMapper.addMixIn(TokenResponse.class, MixInExample.class);
     }
 
+
     @Test(expected = NotAuthorizedException.class)
     @InSequence(1)
     public void securedWithoutToken() throws IOException {
         target.path("/secured").request().accept(MediaType.APPLICATION_JSON).get(TokenResponse.class);
     }
+
 
     @Test(expected = NotAuthorizedException.class)
     @InSequence(2)
@@ -103,6 +101,7 @@ public class JWTOrFormAuthenticationFilterTest {
         user.setPassword("password11");
         target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(objectMapper.writeValueAsString(user)), TokenResponse.class);
     }
+
 
     @Test
     @InSequence(2)
@@ -115,6 +114,7 @@ public class JWTOrFormAuthenticationFilterTest {
         token = tokenResponse.getToken();
     }
 
+
     @Test
     @InSequence(3)
     public void secured() throws IOException {
@@ -123,6 +123,7 @@ public class JWTOrFormAuthenticationFilterTest {
         String r1 = invocationBuilder.get(String.class);
         Assert.assertEquals("Must have a message", "{\"message\":\"" + ResourceExample.MESSAGE + "\"}", r1);
     }
+
 
     @Test(expected = NotAuthorizedException.class)
     @InSequence(4)
@@ -137,5 +138,25 @@ public class JWTOrFormAuthenticationFilterTest {
         invocationBuilder.header("Authorization", token);
         invocationBuilder.get(JsonObject.class);
     }
+
+    @Test
+    @InSequence(5)
+    public void login2() throws IOException {
+        UserDefaultExample user = new UserDefaultExample();
+        user.setUserId("userId2");
+        user.setPassword("password2");
+        Response r1 = target.path("/login").request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(objectMapper.writeValueAsString(user)));
+        TokenResponse tokenResponse = objectMapper.readValue(r1.readEntity(String.class), TokenResponse.class);
+        token = tokenResponse.getToken();
+    }
+    @Test(expected = NotAuthorizedException.class)
+    @InSequence(6)
+    public void secured2withoutRole() throws IOException {
+        Invocation.Builder invocationBuilder = target.path("/secured").request().accept(MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Authorization", token);
+        String r1 = invocationBuilder.get(String.class);
+        Assert.assertEquals("Must have a message", "{\"message\":\"" + ResourceExample.MESSAGE + "\"}", r1);
+    }
+
 
 }

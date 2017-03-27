@@ -6,6 +6,10 @@
     <container qualifier="chameleon" default="true">
         <configuration>
             <property name="chameleonTarget">wildfly:9.0.2.Final:managed</property>
+            <!-- If you want to debug the sever-side Shiro code while running the Arquillian test,   -->
+            <!-- Uncomment the two lines below, run "mvn test" then remote debug to the socket port 5005    -->
+            <!--<property name="javaVmArguments">-Xdebug -agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=y</property>-->
+            <!--<property name="allowConnectingToRunningServer">true</property>-->
         </configuration>
     </container>
     
