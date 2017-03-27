@@ -4,6 +4,4 @@ public interface UserRepository {
 
     UserDefault findByUserId(Object userId);
 
-    UserDefault findById(Object id);
-
 }

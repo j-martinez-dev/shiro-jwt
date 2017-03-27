@@ -44,11 +44,6 @@ public class UserRepositoryExample implements UserRepository {
         return userIdValues.get(userId);
     }
 
-    @Override
-    public UserDefault findById(Object id) {
-        return idValues.get(id);
-    }
-
 
 
 }
