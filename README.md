@@ -14,7 +14,7 @@ We are gonna add some modifications to the tutorial: [Securing Web Applications 
 
 ## Step 1: Enable Shiro
 
-###1a: Add a shiro.ini file
+### 1a: Add a shiro.ini file
 
 This is a traditional shiro.ini file, the important information here is the use of the JWTOrFormAuthenticationFilter. This filter receive a property (loginUrl) that will be the endpoint to do the login with an user and password. All the others endpoints are gonna be validated againts a JWT.
 
@@ -44,7 +44,7 @@ tokenMatcher = org.apache.shiro.authc.credential.SimpleCredentialsMatcher
 /resources/** = filterInternal
 </pre>
 
-###1b: Enable Shiro in web.xml
+### 1b: Enable Shiro in web.xml
 
 The same file of the tutorial works, but it needs the CdiIniWebEnvironment to enable CDI from pax-shiro-cdi-web
 ```xml
@@ -78,9 +78,9 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/
 </web-app>
 ```
 
-##Step 2: Implementing UserDefault and UserRepository
+## Step 2: Implementing UserDefault and UserRepository
 
-###UserDefault 
+### UserDefault 
 UserDefault is the class used to transfer information between your User Store and shiro-jwt. There are only two methods to be implemented: 
 
     public Object getPrincipal();
@@ -102,10 +102,10 @@ findById is used by JWTRealm to get the user's information from the sub field in
 
 The difference is the information that you stock in the field sub in the JWT. If you chose to use the same id that you received in findByUserId (exammple: email address) both methods must be the same. But, if you decide to use another information (example: numeric primary key of the user in the database) you have to implement a specific way to search the user.
 
-##Step 3: Generate tokens
+## Step 3: Generate tokens
 UserRepository.createToken has a default implementation to generate the tokens. You can adapt it for you convenience. 
 
-##Step 4: Log in
+## Step 4: Log in
 To log in using the FormRealm you have to make a POST request in the endpoint configured in the shiro.ini file with a JsonObject with these two fields:
 - userId
 - password
